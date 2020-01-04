@@ -1,11 +1,18 @@
+from dovetail import DoveTail
+
 import svgwrite
 from svgwrite.path import Path
-from svgwrite.shapes import Rect, Line, Circle
+from svgwrite.shapes import Rect, Line, Circle, Polyline
 from svgwrite.container import Group
 from operator import sub, add
 
+import math
+
 dashed_line = {'style': 'stroke:#000000;stroke-opacity:1;fill:none;stroke-width:0.4;stroke-dasharray:1.0,1.0'}
 solid_line = {'style': 'stroke:#000000;stroke-opacity:1;fill:none;stroke-width:0.4'}
+helper_line = {'style': 'stroke:#606060;stroke-opacity:1;fill:none;stroke-width:0.25'}
+
+dovetail = DoveTail(10, 100, 3)
 
 
 def R(*, x1=None, x2=None, y1=None, y2=None, w=None, h=None, **kwargs):
@@ -23,8 +30,6 @@ def R(*, x1=None, x2=None, y1=None, y2=None, w=None, h=None, **kwargs):
         h = -h
 
     return Rect((x1, y1), (w, h), **kwargs)
-
-
 
 
 def sheet():
@@ -133,6 +138,15 @@ def domino_face(x, y, **kwargs):
     return g
 
 
+def dovetail_tail_end(d, bw, visible, invisible):
+    g = Group()
+    for o in list(sum(d.tail_inner(), ())):
+        g.add(Line((o,0), (o, bw), **invisible))
+    for i in list(sum(d.tail_outer(), ())):
+        g.add(Line((i,0), (i, bw), **visible))
+    return g
+
+
 def cabinet_side():
     g = Group()
     g.add(R(x1=0, y1=0, w=120, h=15, **solid_line))
@@ -147,19 +161,74 @@ def cabinet_side():
     g.add(R(x2=120, y1=137.5, w=19, h=40, **dashed_line))
     g.add(Line((120-19, 137.5+40-2), (120, 137.5+40-2), **dashed_line))
     g.add(Line((120-19, 137.5+2), (120, 137.5+2), **dashed_line))
+
+    dovetail_end = dovetail_tail_end(dovetail, 15, dashed_line, dashed_line)
+    dovetail_end.add(Line((0,0), (96, 0), **dashed_line))
+    dovetail_end.translate(20, 260)
+    g.add(dovetail_end)
+    return g
+
+
+def dovetail_tail_face(d, **kwargs):
+    g = Group()
+    for i, o in zip(d.tail_inner(), d.tail_outer()):
+        g.add(Polyline([(i[0], 0), (i[1], 0), (o[1], d.w), (o[0], d.w), (i[0], 0)], **kwargs))
+    return g
+
+
+def dovetail_pin_end(d, **kwargs):
+    g = Group()
+    for i, o in zip(d.pin_inner(), d.pin_outer()):
+        g.add(Polyline([(i[0], 0), (i[1], 0), (o[1], d.w), (o[0], d.w), (i[0], 0)], **kwargs))
     return g
 
 
 def cabinet_bottom():
     g = Group()
+
+    #back hangers
+    g.add(R(x1=5+5, y1=4, w=320, h=15, **dashed_line))
+
+    dovetail_left = Group()
+    dovetail_left.add(dovetail_tail_face(dovetail, **dashed_line))
+    dovetail_left.add(dovetail_pin_end(dovetail, **solid_line))
+    dovetail_left.add(Line((0, dovetail.w), (dovetail.l, dovetail.w), **solid_line))
+    dovetail_left.add(dovetail_tail_face_helpers(dovetail, angle=math.pi/12, **helper_line))
+    dovetail_left.rotate(90)
+    dovetail_left.translate(0, -20)
+    g.add(dovetail_left)
+
+    dovetail_right = Group()
+    dovetail_right.add(dovetail_tail_face(dovetail, **dashed_line))
+    dovetail_right.add(dovetail_pin_end(dovetail, **solid_line))
+    dovetail_right.add(Line((0, dovetail.w), (dovetail.l, dovetail.w), **solid_line))
+    dovetail_right.rotate(-90)
+    dovetail_right.translate(-dovetail.l, 330-dovetail.w)
+    g.add(dovetail_right)
+
     g.add(R(x1=0, y1=0, w=340, h=120, **solid_line))
     g.add(R(x1=5, y1=0, w=330, h=100, **solid_line))
+    return g
 
-    h = 100
-    w = 10
-    t = 3
-    a = h/(3.0*t+1)
 
+def dovetail_tail_face_helpers(d, angle=math.pi/6, **kwargs):
+    g = Group()
+    g.add(Line((0, d.w/2.0), (d.l, d.w/2.0), **kwargs))
+    n = 3*d.t + 1
+    for i in range(1, n + 1):
+        l = d.l * i / n
+        g.add(Line((l, d.w/2.0), (l*math.cos(angle), d.w/2.0+l*math.sin(angle)), **kwargs))
+    g.add(Line((0, d.w / 2.0), (d.l * math.cos(angle), d.w / 2.0 + d.l * math.sin(angle)), **kwargs))
+    for i in range(4,7):
+        g.add(Line((i*d.a, d.w/2), (5*d.a, -6*d.a-d.w/2.0), **kwargs))
+    return g
+
+
+def dt():
+    g = Group()
+    g.add(dovetail_tail_face(dovetail, **dashed_line))
+    g.add(dovetail_pin_end(dovetail, **solid_line))
+    g.add(dovetail_tail_face_helpers(dovetail, angle=math.pi/10, **helper_line))
     return g
 
 
@@ -179,4 +248,8 @@ dwg.save()
 
 dwg = svgwrite.Drawing('/d/tmp/a/cabinet_bottom.svg', profile='tiny', size=('420mm', '594mm'), viewBox='-10 -10 410 584')
 dwg.add(cabinet_bottom())
+dwg.save()
+
+dwg = svgwrite.Drawing('/d/tmp/a/dovetail_helper.svg', profile='tiny', size=('420mm', '594mm'), viewBox='-100 -100 410 584')
+dwg.add(dt())
 dwg.save()
