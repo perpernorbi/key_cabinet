@@ -207,43 +207,44 @@ def dimension(insert, size, **kwargs):
     return g
 
 
-dwg = svgwrite.Drawing('/d/tmp/a/test.svg', profile='tiny', size=('420mm', '594mm'), viewBox='-10 -10 410 584')
+outdir = '/d/tmp/a'
+dwg = svgwrite.Drawing('%s/test.svg' % outdir, profile='tiny', size=('420mm', '594mm'), viewBox='-10 -10 410 584')
 #dwg.add(sheet())
 #p = Path(**dashed_line)
 #p.push('M 100 100')
 #p.push('100 200 200 200')
 
-dwg = svgwrite.Drawing('/d/tmp/a/door_front.svg', profile='tiny', size=('420mm', '594mm'), viewBox='-10 -10 410 584')
+dwg = svgwrite.Drawing('%s/door_front.svg' % outdir, profile='tiny', size=('420mm', '594mm'), viewBox='-10 -10 410 584')
 dwg.add(door_front())
 dwg.save()
 
-dwg = svgwrite.Drawing('/d/tmp/a/door_side.svg', profile='tiny', size=('420mm', '594mm'), viewBox='-10 -10 410 584')
+dwg = svgwrite.Drawing('%s/door_side.svg' % outdir, profile='tiny', size=('420mm', '594mm'), viewBox='-10 -10 410 584')
 dwg.add(door_side())
 dwg.save()
 
-dwg = svgwrite.Drawing('/d/tmp/a/door_left_top.svg', profile='tiny', size=('420mm', '594mm'), viewBox='-10 -10 410 584')
+dwg = svgwrite.Drawing('%s/door_left_top.svg' % outdir, profile='tiny', size=('420mm', '594mm'), viewBox='-10 -10 410 584')
 dwg.add(door_left_top())
 dwg.save()
 
-dwg = svgwrite.Drawing('/d/tmp/a/cabinet_front.svg', profile='tiny', size=('420mm', '594mm'), viewBox='-10 -10 410 584')
+dwg = svgwrite.Drawing('%s/cabinet_front.svg' % outdir, profile='tiny', size=('420mm', '594mm'), viewBox='-10 -10 410 584')
 dwg.add(cabinet_front())
 dwg.save()
 
-dwg = svgwrite.Drawing('/d/tmp/a/cabinet_side.svg', profile='tiny', size=('420mm', '594mm'), viewBox='-10 -10 410 584')
+dwg = svgwrite.Drawing('%s/cabinet_side.svg' % outdir, profile='tiny', size=('420mm', '594mm'), viewBox='-10 -10 410 584')
 dwg.add(cabinet_side())
 dwg.save()
 
-dwg = svgwrite.Drawing('/d/tmp/a/cabinet_bottom.svg', profile='tiny', size=('420mm', '594mm'), viewBox='-10 -10 410 584')
+dwg = svgwrite.Drawing('%s/cabinet_bottom.svg' % outdir, profile='tiny', size=('420mm', '594mm'), viewBox='-10 -10 410 584')
 dwg.add(cabinet_bottom())
 dwg.save()
 
-dwg = svgwrite.Drawing('/d/tmp/a/cabinet_top.svg', profile='tiny', size=('420mm', '594mm'), viewBox='-10 -10 410 584')
+dwg = svgwrite.Drawing('%s/cabinet_top.svg' % outdir, profile='tiny', size=('420mm', '594mm'), viewBox='-10 -10 410 584')
 top = cabinet_top()
 top.scale(0.2, 0.2)
 dwg.add(top)
 dwg.save()
 
-dwg = svgwrite.Drawing('/d/tmp/a/test.svg', profile='tiny', size=('420mm', '594mm'), viewBox='-10 -10 410 584')
+dwg = svgwrite.Drawing('%s/test.svg' % outdir, profile='tiny', size=('420mm', '594mm'), viewBox='-10 -10 410 584')
 dwg.add(dimension((50, 100), (100, 0), **solid_line))
 dwg.save()
 
