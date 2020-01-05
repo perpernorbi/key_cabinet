@@ -245,14 +245,19 @@ def jellegrajz():
     door_s.translate(1, 16)
     g.add(door_s)
     door_f = door_front()
-    door_f.translate(158, 16)
+    door_f.translate(150 + 5 + 2, 16)
     g.add(door_f)
     cab_top = cabinet_top()
     cab_top.translate(150, 300)
     g.add(cab_top)
-    door_t = door_left_top(full_dashed = True)
-    door_t.translate(158, 300+100+1)
-    g.add(door_t)
+    door_t1 = door_left_top(full_dashed = True)
+    door_t1.translate(150 + 5 + 2, 300+100+1)
+    g.add(door_t1)
+    door_t2 = door_left_top(full_dashed = True)
+    door_t2.translate(150 + 5 + 2 + 2 + 162 + 162, 300+100+1)
+    door_t2.scale(-1,1)
+    g.add(door_t2)
+
     return g
 
 
