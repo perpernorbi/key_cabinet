@@ -1,10 +1,15 @@
 from dovetail import DoveTail
 
+from svg.dovetail import dovetail_tail_end, dovetail_pin_end, dovetail_tail_face, dovetail_tail_face_helpers, dovetail_diagonals
+import svg.chamfered
+import svg.domino
+from svg.util import R
+
 import svgwrite
 from svgwrite.path import Path
-from svgwrite.shapes import Rect, Line, Circle, Polyline
+from svgwrite.shapes import Rect, Line, Circle
 from svgwrite.container import Group
-from operator import sub, add
+from svgwrite.text import Text
 
 import math
 
@@ -15,54 +20,6 @@ helper_line = {'style': 'stroke:#606060;stroke-opacity:1;fill:none;stroke-width:
 dovetail = DoveTail(10, 100, 3)
 
 
-def R(*, x1=None, x2=None, y1=None, y2=None, w=None, h=None, **kwargs):
-    x1 = x2 - w if x1 is None else x1
-    y1 = y2 - h if y1 is None else y1
-    w = x2 - x1 if w is None else w
-    h = y2 - y1 if h is None else h
-
-    if w < 0:
-        x1 = x1 + w
-        w = -w
-
-    if h < 0:
-        y1 = y1 - h
-        h = -h
-
-    return Rect((x1, y1), (w, h), **kwargs)
-
-
-def sheet():
-    l = {'style': 'stroke:#000000;stroke-opacity:1;fill:none;stroke-width:0.5'}
-    g = Group()
-    g.add(Rect((10, 10), (190, 277), **l))
-
-    g.add(Rect((10, 10), (60, 7.5), **l))
-    g.add(Rect((10, 10), (60, 15), **l))
-    g.add(Rect((180, 10), (20, 7.5), **l))
-    g.add(Rect((180, 10), (20, 15), **l))
-    g.add(Rect((10, 10), (190, 15), **l))
-    return g
-
-
-def corners(insert, size):
-    return ((insert[0], insert[1]),
-            (insert[0], insert[1]+size[1]),
-            (insert[0]+size[0], insert[1]),
-            (insert[0]+size[0], insert[1]+size[1]),
-            )
-
-
-def chamfered_rect_front(insert, size, c, **extra):
-    g = Group()
-    g.add(Rect(insert, size, **extra))
-    inner_insert, inner_size = tuple(map(add, insert, (c, c))), tuple(map(sub, size, (2*c, 2*c)))
-    g.add(Rect(inner_insert, inner_size, **extra))
-    for a,b in zip(corners(insert, size), corners(inner_insert, inner_size)):
-        g.add(Line(a,b, **extra))
-    return g
-
-
 def door_front():
     w = 162
     h = 260
@@ -71,16 +28,16 @@ def door_front():
     groove_depth = 10
     g = Group()
     g.add(Line((f - groove_depth, 0), (f - groove_depth, h), **dashed_line))
-    g.add(chamfered_rect_front((0, 0), (f, h), chamfer, **solid_line))
+    g.add(svg.chamfered.front((0, 0), (f, h), chamfer, **solid_line))
 
     g.add(Rect((f - groove_depth + 1, 0), (w-2*f+2*groove_depth-2, f-groove_depth), **dashed_line))
-    g.add(chamfered_rect_front((f, 0), (w-2*f, f), chamfer, **solid_line))
+    g.add(svg.chamfered.front((f, 0), (w-2*f, f), chamfer, **solid_line))
 
     g.add(Rect((f - groove_depth + 1, h-f+groove_depth), (w-2*f+2*groove_depth-2, f-groove_depth), **dashed_line))
-    g.add(chamfered_rect_front((f, h-f), (w-2*f, f), chamfer, **solid_line))
+    g.add(svg.chamfered.front((f, h-f), (w-2*f, f), chamfer, **solid_line))
 
     g.add(Line((w - f + groove_depth, 0), (w - f + groove_depth, h), **dashed_line))
-    g.add(chamfered_rect_front((w-f, 0), (f, h), chamfer, **solid_line))
+    g.add(svg.chamfered.front((w-f, 0), (f, h), chamfer, **solid_line))
 
     g.add(Rect((f - groove_depth + 1, f-groove_depth + 1), (w-2*f+2*groove_depth-2, h-2*f+2*groove_depth-2), **dashed_line))
 
@@ -98,6 +55,24 @@ def door_side():
     g.add(Rect((18-13, 53-13), (13, 26), **dashed_line))
     g.add(Rect((18-13, h-53-13), (13, 26), **dashed_line))
     g.add(Path(f'M2 0 L18 0 L18 {h} L2 {h} L0 {h-2} L0 2 Z', **solid_line))
+    return g
+
+
+def door_left_top():
+    w = 162
+    c = 2
+    g = Group()
+    g.add(Path(f'M0 0 l40 0 l0 6.5 l-10 0 l0 5 l10 0 l0 {6.5-c} l{-c} {c} l{2*c-40} 0 l{-c} {-c} Z', **solid_line))
+    g.add(Path(f'M{w} 0 l-40 0 l0 6.5 l10 0 l0 5 l-10 0 l0 {6.5-c} l{c} {c} l{40-2*c} 0 l{c} {-c} Z', **solid_line))
+    g.add(Path(f'M40 0 l{w-2*40} 0 l0 6.5 l9 0 l0 5 l-9 0 l0 {6.5-c} l{-c} {c} l{-w+2*40+2*c} 0 l{-c} {-c} l0 {-6.5+c} '
+               f'l-9 0 l0 -5 l9 0 Z', **solid_line))
+    g.add(Rect((31, 7), (100, 4), **dashed_line))
+    #g.add(Rect((0, 7), (30, 4), **dashed_line)
+    #g.add(Rect((h-30, 7), (30, 4), **dashed_line))
+    #g.add(Rect((0, 6.5), (h, 5), **dashed_line))
+    g.add(Rect((4, 0), (26, 13), **dashed_line))
+    #g.add(Rect((18-13, h-53-13), (13, 26), **dashed_line))
+    #g.add(Path(f'M2 0 L18 0 L18 {h} L2 {h} L0 {h-2} L0 2 Z', **solid_line))
     return g
 
 
@@ -131,34 +106,18 @@ def cabinet_front():
     return g
 
 
-def domino_face(x, y, **kwargs):
-    g = Group()
-    g.add(R(x1=x, y1=y, w=21, h=37, **kwargs))
-    g.add(R(x1=x+1, y1=y+1, w=19, h=35, **kwargs))
-    return g
-
-
-def dovetail_tail_end(d, bw, visible, invisible):
-    g = Group()
-    for o in list(sum(d.tail_inner(), ())):
-        g.add(Line((o,0), (o, bw), **invisible))
-    for i in list(sum(d.tail_outer(), ())):
-        g.add(Line((i,0), (i, bw), **visible))
-    return g
-
-
 def cabinet_side():
     g = Group()
-    g.add(R(x1=0, y1=0, w=120, h=15, **solid_line))
-    g.add(R(x2=120, y1=5, w=4, y2=15+260-5, **dashed_line))
-    g.add(R(x2=120, y1=15, w=100, h=260, **solid_line))
-    g.add(domino_face(40, 5, **dashed_line))
-    g.add(domino_face(75, 5, **dashed_line))
+    g.add(Rect(*R(x1=0, y1=0, w=120, h=15), **solid_line))
+    g.add(Rect(*R(x2=120, y1=5, w=4, y2=15+260-5), **dashed_line))
+    g.add(Rect(*R(x2=120, y1=15, w=100, h=260), **solid_line))
+    g.add(svg.domino.face(40, 5, **dashed_line))
+    g.add(svg.domino.face(75, 5, **dashed_line))
 
-    g.add(R(x2=120, y1=15, w=19, h=40, **dashed_line))
+    g.add(Rect(*R(x2=120, y1=15, w=19, h=40), **dashed_line))
     g.add(Line((120-19, 15+40-2), (120, 15+40-2), **dashed_line))
 
-    g.add(R(x2=120, y1=137.5, w=19, h=40, **dashed_line))
+    g.add(Rect(*R(x2=120, y1=137.5, w=19, h=40), **dashed_line))
     g.add(Line((120-19, 137.5+40-2), (120, 137.5+40-2), **dashed_line))
     g.add(Line((120-19, 137.5+2), (120, 137.5+2), **dashed_line))
 
@@ -169,25 +128,11 @@ def cabinet_side():
     return g
 
 
-def dovetail_tail_face(d, **kwargs):
-    g = Group()
-    for i, o in zip(d.tail_inner(), d.tail_outer()):
-        g.add(Polyline([(i[0], 0), (i[1], 0), (o[1], d.w), (o[0], d.w), (i[0], 0)], **kwargs))
-    return g
-
-
-def dovetail_pin_end(d, **kwargs):
-    g = Group()
-    for i, o in zip(d.pin_inner(), d.pin_outer()):
-        g.add(Polyline([(i[0], 0), (i[1], 0), (o[1], d.w), (o[0], d.w), (i[0], 0)], **kwargs))
-    return g
-
-
 def cabinet_bottom():
     g = Group()
 
     #back hangers
-    g.add(R(x1=5+5, y1=4, w=320, h=15, **dashed_line))
+    g.add(Rect(*R(x1=5+5, y1=4, w=320, h=15), **dashed_line))
 
     dovetail_left = Group()
     dovetail_left.add(dovetail_tail_face(dovetail, **dashed_line))
@@ -206,21 +151,37 @@ def cabinet_bottom():
     dovetail_right.translate(-dovetail.l, 330-dovetail.w)
     g.add(dovetail_right)
 
-    g.add(R(x1=0, y1=0, w=340, h=120, **solid_line))
-    g.add(R(x1=5, y1=0, w=330, h=100, **solid_line))
+    g.add(Rect(*R(x1=0, y1=0, w=340, h=120), **solid_line))
+    g.add(Rect(*R(x1=5, y1=0, w=330, h=100), **solid_line))
     return g
 
 
-def dovetail_tail_face_helpers(d, angle=math.pi/6, **kwargs):
+def cabinet_top():
     g = Group()
-    g.add(Line((0, d.w/2.0), (d.l, d.w/2.0), **kwargs))
-    n = 3*d.t + 1
-    for i in range(1, n + 1):
-        l = d.l * i / n
-        g.add(Line((l, d.w/2.0), (l*math.cos(angle), d.w/2.0+l*math.sin(angle)), **kwargs))
-    g.add(Line((0, d.w / 2.0), (d.l * math.cos(angle), d.w / 2.0 + d.l * math.sin(angle)), **kwargs))
-    for i in range(4,7):
-        g.add(Line((i*d.a, d.w/2), (5*d.a, -6*d.a-d.w/2.0), **kwargs))
+
+    #back hangers
+    #g.add(Rect(*R(x1=5+5, y1=4, w=320, h=15), **dashed_line))
+    g.add(Line((5+5, 4), (5+5+320, 4), **dashed_line))
+    g.add(Line((5+5, 19), (5+5+320, 19), **dashed_line))
+
+    dovetail_left = Group()
+    dovetail_left.add(dovetail_diagonals(dovetail, **dashed_line))
+    dovetail_left.add(Line((0, dovetail.w), (dovetail.l, dovetail.w), **dashed_line))
+    dovetail_left.add(Line((0, 0), (dovetail.l, 0), **dashed_line))
+    dovetail_left.rotate(90)
+    dovetail_left.translate(0, -20)
+    g.add(dovetail_left)
+
+    dovetail_right = Group()
+    dovetail_right.add(dovetail_diagonals(dovetail, **dashed_line))
+    dovetail_right.add(Line((0, dovetail.w), (dovetail.l, dovetail.w), **dashed_line))
+    dovetail_right.add(Line((0, 0), (dovetail.l, 0), **dashed_line))
+    dovetail_right.rotate(-90)
+    dovetail_right.translate(-dovetail.l, 330-dovetail.w)
+    g.add(dovetail_right)
+
+    g.add(Rect(*R(x1=5, y1=0, w=330, h=100), **dashed_line))
+    g.add(Rect(*R(x1=0, y1=0, w=340, h=120), **solid_line))
     return g
 
 
@@ -232,16 +193,42 @@ def dt():
     return g
 
 
+def dimension(insert, size, **kwargs):
+    l = math.sqrt(size[0] ** 2 + size[1] ** 2)
+    e = 1
+    endtick = lambda i: ((i[0]-e, i[1]+e), (i[0]+e, i[1]-e))
+    g = Group()
+    g.add(Line(*endtick(insert), **kwargs))
+    g.add(Line(*endtick(((insert[0] + size[0]), (insert[1] + size[1]))), **kwargs))
+    g.add(Line(insert, (insert[0] + size[0], insert[1] + size[1]), **kwargs))
+    g.add(Text(f"{int(l) if l.is_integer() else l}", (insert[0] + l/2.0, insert[1]-e), text_anchor="middle", alignment_baseline="after-edge",
+          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.77471018px;line-height:1.25;font-family:Bariol;-inkscape-font-specification:Bariol;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26012909"))
+    g.rotate(-90, center=insert)
+    return g
+
+
 dwg = svgwrite.Drawing('/d/tmp/a/test.svg', profile='tiny', size=('420mm', '594mm'), viewBox='-10 -10 410 584')
 #dwg.add(sheet())
 #p = Path(**dashed_line)
 #p.push('M 100 100')
 #p.push('100 200 200 200')
+
+dwg = svgwrite.Drawing('/d/tmp/a/door_front.svg', profile='tiny', size=('420mm', '594mm'), viewBox='-10 -10 410 584')
+dwg.add(door_front())
+dwg.save()
+
+dwg = svgwrite.Drawing('/d/tmp/a/door_side.svg', profile='tiny', size=('420mm', '594mm'), viewBox='-10 -10 410 584')
+dwg.add(door_side())
+dwg.save()
+
+dwg = svgwrite.Drawing('/d/tmp/a/door_left_top.svg', profile='tiny', size=('420mm', '594mm'), viewBox='-10 -10 410 584')
+dwg.add(door_left_top())
+dwg.save()
+
 dwg = svgwrite.Drawing('/d/tmp/a/cabinet_front.svg', profile='tiny', size=('420mm', '594mm'), viewBox='-10 -10 410 584')
 dwg.add(cabinet_front())
 dwg.save()
-#dwg.add(door_front())
-#dwg.add(door_side())
+
 dwg = svgwrite.Drawing('/d/tmp/a/cabinet_side.svg', profile='tiny', size=('420mm', '594mm'), viewBox='-10 -10 410 584')
 dwg.add(cabinet_side())
 dwg.save()
@@ -250,6 +237,13 @@ dwg = svgwrite.Drawing('/d/tmp/a/cabinet_bottom.svg', profile='tiny', size=('420
 dwg.add(cabinet_bottom())
 dwg.save()
 
-dwg = svgwrite.Drawing('/d/tmp/a/dovetail_helper.svg', profile='tiny', size=('420mm', '594mm'), viewBox='-100 -100 410 584')
-dwg.add(dt())
+dwg = svgwrite.Drawing('/d/tmp/a/cabinet_top.svg', profile='tiny', size=('420mm', '594mm'), viewBox='-10 -10 410 584')
+top = cabinet_top()
+top.scale(0.2, 0.2)
+dwg.add(top)
 dwg.save()
+
+dwg = svgwrite.Drawing('/d/tmp/a/test.svg', profile='tiny', size=('420mm', '594mm'), viewBox='-10 -10 410 584')
+dwg.add(dimension((50, 100), (100, 0), **solid_line))
+dwg.save()
+
