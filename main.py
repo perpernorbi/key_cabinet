@@ -22,7 +22,7 @@ dovetail = DoveTail(10, 100, 3)
 
 def door_front():
     w = 162
-    h = 260
+    h = 258
     f = 40
     chamfer = 2
     groove_depth = 10
@@ -41,56 +41,84 @@ def door_front():
 
     g.add(Rect((f - groove_depth + 1, f-groove_depth + 1), (w-2*f+2*groove_depth-2, h-2*f+2*groove_depth-2), **dashed_line))
 
-    g.add(Circle((17, 53), 13, **dashed_line))
-    g.add(Circle((17, h-53), 13, **dashed_line))
+    g.add(Circle((17, 55), 13, **dashed_line))
+    g.add(Circle((17, h-55), 13, **dashed_line))
     return g
 
 
 def door_side():
-    h = 260
+    h = 258
     g = Group()
     g.add(Rect((7, 0), (4, 30), **dashed_line))
     g.add(Rect((7, h-30), (4, 30), **dashed_line))
-    g.add(Rect((6.5, 0), (5, h), **dashed_line))
-    g.add(Rect((18-13, 53-13), (13, 26), **dashed_line))
-    g.add(Rect((18-13, h-53-13), (13, 26), **dashed_line))
+    g.add(Line((6.5, 0), (6.5, h), **dashed_line))
+    g.add(Line((6.5+5, 0), (6.5+5, h), **dashed_line))
+    g.add(Rect((18-13, 55-13), (13, 26), **dashed_line))
+    g.add(Rect((18-13, h-55-13), (13, 26), **dashed_line))
+    g.add(Path('M0 38 l2 2 l16 0', **dashed_line))
+    g.add(Path(f'M0 {h-38} l2 -2 l16 0', **dashed_line))
     g.add(Path(f'M2 0 L18 0 L18 {h} L2 {h} L0 {h-2} L0 2 Z', **solid_line))
     return g
 
 
-def door_left_top():
+def door_left_top(full_dashed = False):
+    solid_or_dashed = dashed_line if full_dashed else solid_line
+
     w = 162
     c = 2
     g = Group()
-    g.add(Path(f'M0 0 l40 0 l0 6.5 l-10 0 l0 5 l10 0 l0 {6.5-c} l{-c} {c} l{2*c-40} 0 l{-c} {-c} Z', **solid_line))
-    g.add(Path(f'M{w} 0 l-40 0 l0 6.5 l10 0 l0 5 l-10 0 l0 {6.5-c} l{c} {c} l{40-2*c} 0 l{c} {-c} Z', **solid_line))
+    g.add(Path(f'M0 0 l40 0 l0 6.5 l-10 0 l0 5 l10 0 l0 {6.5-c} l{-c} {c} l{2*c-40} 0 l{-c} {-c} Z', **solid_or_dashed))
+    g.add(Path(f'M{w} 0 l-40 0 l0 6.5 l10 0 l0 5 l-10 0 l0 {6.5-c} l{c} {c} l{40-2*c} 0 l{c} {-c} Z',
+               **solid_or_dashed))
     g.add(Path(f'M40 0 l{w-2*40} 0 l0 6.5 l9 0 l0 5 l-9 0 l0 {6.5-c} l{-c} {c} l{-w+2*40+2*c} 0 l{-c} {-c} l0 {-6.5+c} '
-               f'l-9 0 l0 -5 l9 0 Z', **solid_line))
+               f'l-9 0 l0 -5 l9 0 Z', **solid_or_dashed))
     g.add(Rect((31, 7), (100, 4), **dashed_line))
-    #g.add(Rect((0, 7), (30, 4), **dashed_line)
-    #g.add(Rect((h-30, 7), (30, 4), **dashed_line))
-    #g.add(Rect((0, 6.5), (h, 5), **dashed_line))
     g.add(Rect((4, 0), (26, 13), **dashed_line))
-    #g.add(Rect((18-13, h-53-13), (13, 26), **dashed_line))
-    #g.add(Path(f'M2 0 L18 0 L18 {h} L2 {h} L0 {h-2} L0 2 Z', **solid_line))
     return g
 
 
-def cabinet_front():
+def halved_line(start, end, first, second):
+    g = Group()
+    midpoint = (start[0] + (end[0] - start[0])/2.0, start[1] + (end[1] - start[1])/2.0)
+    g.add(Line(start, midpoint, **first))
+    g.add(Line(midpoint, end, **second))
+    return g
+
+
+def cabinet_front(left_dashed = False):
+    solid_or_dashed = dashed_line if left_dashed else solid_line
     g = Group()
     g.add(Rect((0,0), (340,15), **solid_line))
-    g.add(Rect((5,15), (15, 260), **solid_line))
+
+    # left side panel
+    #g.add(Rect((5,15), (15, 260), **solid_line))
+    g.add(Line((5,15), (5, 275), **solid_line))
+    g.add(Line((20,15), (20, 275), **solid_or_dashed))
+    if left_dashed:
+        g.add(Line((20, 15), (20, 16), **solid_line))
+        g.add(Line((20, 274), (20, 275), **solid_line))
+    g.add(Line((5, 275), (20, 275), **solid_line))
+
+    # right side panel
     g.add(Rect((320,15), (15, 260), **solid_line))
 
-    g.add(Rect((20,260), (300, 15), **solid_line))
+    # bottom panel
+    #g.add(Rect((20, 260), (300, 15), **solid_line))
+    g.add(halved_line((20,260), (20+300, 260), solid_or_dashed, solid_line))
+    g.add(Line((20,275), (20+300, 275), **solid_line))
     g.add(Path('M10 275 l 0 -15 l 10 0', **dashed_line))
     g.add(Path('M330 275 l 0 -15 l -10 0', **dashed_line))
 
-    g.add(Rect((20, 15), (300, 40), **solid_line))
+    # upper hanger
+    #g.add(Rect((20, 15), (300, 40), **solid_line))
+    g.add(halved_line((20, 15+40), (20+300, 15+40), solid_or_dashed, solid_line))
     g.add(Path('M10 15 l0 40 l10 -2', **dashed_line))
     g.add(Path('M330 15 l0 40 l-10 -2', **dashed_line))
 
-    g.add(Rect((20,137.5), (300,40), **solid_line))
+    # lower hanger
+    #g.add(Rect((20,137.5), (300,40), **solid_line))
+    g.add(halved_line((20, 137.5), (20+300, 137.5), solid_or_dashed, solid_line))
+    g.add(halved_line((20, 137.5+40), (20+300, 137.5+40), solid_or_dashed, solid_line))
     g.add(Path('M10 137.5 l0 40 l10 -2', **dashed_line))
     g.add(Path('M330 137.5 l0 40 l-10 -2', **dashed_line))
     g.add(Path('M10 137.5 l10 2', **dashed_line))
@@ -207,6 +235,27 @@ def dimension(insert, size, **kwargs):
     return g
 
 
+def jellegrajz():
+    g = Group()
+    cab_front = cabinet_front(left_dashed=True)
+    cab_front.translate(150,0)
+    g.add(cab_front)
+    g.add(cabinet_side())
+    door_s = door_side()
+    door_s.translate(1, 16)
+    g.add(door_s)
+    door_f = door_front()
+    door_f.translate(158, 16)
+    g.add(door_f)
+    cab_top = cabinet_top()
+    cab_top.translate(150, 300)
+    g.add(cab_top)
+    door_t = door_left_top(full_dashed = True)
+    door_t.translate(158, 300+100+1)
+    g.add(door_t)
+    return g
+
+
 outdir = '/d/tmp/a'
 dwg = svgwrite.Drawing('%s/test.svg' % outdir, profile='tiny', size=('420mm', '594mm'), viewBox='-10 -10 410 584')
 #dwg.add(sheet())
@@ -239,9 +288,11 @@ dwg.add(cabinet_bottom())
 dwg.save()
 
 dwg = svgwrite.Drawing('%s/cabinet_top.svg' % outdir, profile='tiny', size=('420mm', '594mm'), viewBox='-10 -10 410 584')
-top = cabinet_top()
-top.scale(0.2, 0.2)
-dwg.add(top)
+dwg.add(cabinet_top())
+dwg.save()
+
+dwg = svgwrite.Drawing('%s/jellegrajz.svg' % outdir, profile='tiny', size=('594mm', '840mm'), viewBox='-10 -10 584 840')
+dwg.add(jellegrajz())
 dwg.save()
 
 dwg = svgwrite.Drawing('%s/test.svg' % outdir, profile='tiny', size=('420mm', '594mm'), viewBox='-10 -10 410 584')
