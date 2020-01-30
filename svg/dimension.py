@@ -4,8 +4,9 @@ from svgwrite.shapes import Line
 
 import math
 
-def dimension(insert, size, font_size=0.8, offset=0, **kwargs):
-    offset = offset + font_size * 7
+
+def dimension(insert, size, font_size=0.8, offset=None, **kwargs):
+    offset = offset if offset is not None else font_size * 7
     x, y = insert[0], insert[1] + offset
     width, height = size
     l = math.sqrt(width ** 2 + height ** 2)

@@ -3,18 +3,22 @@ from dovetail import DoveTail
 from svg.dovetail import dovetail_tail_end, dovetail_pin_end, dovetail_tail_face, dovetail_tail_face_helpers, dovetail_diagonals
 import svg.chamfered
 import svg.domino
+import svg.sheet
+from svg.dimension import dimension as dimension
 from svg.util import R
 
 import svgwrite
 from svgwrite.path import Path
 from svgwrite.shapes import Rect, Line, Circle
 from svgwrite.container import Group
-from svgwrite.text import Text
+
 
 import math
 
 dashed_line = {'style': 'stroke:#000000;stroke-opacity:1;fill:none;stroke-width:0.4;stroke-dasharray:1.0,1.0'}
-solid_line = {'style': 'stroke:#000000;stroke-opacity:1;fill:none;stroke-width:0.4'}
+dashed_line = {'style': 'stroke:#000000;stroke-opacity:0;fill:none;stroke-width:0.4;stroke-dasharray:1.0,1.0'}
+solid_line = {'style': 'stroke:#000000;stroke-opacity:1;fill:none;stroke-width:0.6'}
+dimension_line = {'style': 'stroke:#202020;stroke-opacity:1;fill:none;stroke-width:0.3'}
 helper_line = {'style': 'stroke:#606060;stroke-opacity:1;fill:none;stroke-width:0.25'}
 
 dovetail = DoveTail(10, 100, 3)
@@ -221,49 +225,54 @@ def dt():
     return g
 
 
-def dimension(insert, size, **kwargs):
-    l = math.sqrt(size[0] ** 2 + size[1] ** 2)
-    e = 1
-    endtick = lambda i: ((i[0]-e, i[1]+e), (i[0]+e, i[1]-e))
-    g = Group()
-    g.add(Line(*endtick(insert), **kwargs))
-    g.add(Line(*endtick(((insert[0] + size[0]), (insert[1] + size[1]))), **kwargs))
-    g.add(Line(insert, (insert[0] + size[0], insert[1] + size[1]), **kwargs))
-    g.add(Text(f"{int(l) if l.is_integer() else l}", (insert[0] + l/2.0, insert[1]-e), text_anchor="middle", alignment_baseline="after-edge",
-          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.77471018px;line-height:1.25;font-family:Bariol;-inkscape-font-specification:Bariol;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26012909"))
-    g.rotate(-90, center=insert)
-    return g
-
-
-def jellegrajz():
+def formaterv():
     g = Group()
     cab_front = cabinet_front(left_dashed=True)
+    #cab_front.add(dimension((0, 0), (340, 0), 3, -10, **dimension_line))
+    cab_front.add(dimension((335, 0), (0, 275), 3, -30, **dimension_line))
+    cab_front.add(dimension((5, 255+16), (330, 0), 3, 42, **dimension_line))
     cab_front.translate(150,0)
     g.add(cab_front)
-    g.add(cabinet_side())
+
+    cab_side = cabinet_side()
+    #cab_side.add(dimension((0, 0), (120, 0), 3, -10, **dimension_line))
+    cab_side.add(dimension((20, 255+16), (100, 0), 3, **dimension_line))
+    g.add(cab_side)
+
     door_s = door_side()
+    door_s.add(dimension((0, 255), (18, 0), 3, **dimension_line))
     door_s.translate(1, 16)
     g.add(door_s)
+
     door_f = door_front()
     door_f.translate(150 + 5 + 2, 16)
+    door_f.add(dimension((0, 255), (162, 0), 3, **dimension_line))
     g.add(door_f)
+
     cab_top = cabinet_top()
-    cab_top.translate(150, 300)
+    cab_top.add(dimension((0, 0), (0, 120), 3, **dimension_line))
+    cab_top.add(dimension((0, 120), (340, 0), 3, **dimension_line))
+    cab_top.translate(150, 340)
     g.add(cab_top)
-    door_t1 = door_left_top(full_dashed = True)
+
+    door_t1 = door_left_top(full_dashed=True)
     door_t1.translate(150 + 5 + 2, 300+100+1)
     g.add(door_t1)
-    door_t2 = door_left_top(full_dashed = True)
+
+    door_t2 = door_left_top(full_dashed=True)
     door_t2.translate(150 + 5 + 2 + 2 + 162 + 162, 300+100+1)
     door_t2.scale(-1,1)
     g.add(door_t2)
+
+    g.scale(0.25, 0.25)
 
     return g
 
 
 outdir = '/d/tmp/a'
-dwg = svgwrite.Drawing('%s/test.svg' % outdir, profile='tiny', size=('420mm', '594mm'), viewBox='-10 -10 410 584')
-#dwg.add(sheet())
+dwg = svgwrite.Drawing('%s/sheet.svg' % outdir, profile='tiny', size=('420mm', '594mm'), viewBox='-10 -10 410 584')
+dwg.add(svg.sheet.sheet())
+dwg.save()
 #p = Path(**dashed_line)
 #p.push('M 100 100')
 #p.push('100 200 200 200')
@@ -296,11 +305,33 @@ dwg = svgwrite.Drawing('%s/cabinet_top.svg' % outdir, profile='tiny', size=('420
 dwg.add(cabinet_top())
 dwg.save()
 
-dwg = svgwrite.Drawing('%s/jellegrajz.svg' % outdir, profile='tiny', size=('594mm', '840mm'), viewBox='-10 -10 584 840')
-dwg.add(jellegrajz())
+dwg = svgwrite.Drawing('%s/formaterv.svg' % outdir, profile='tiny', size=('594mm', '840mm'), viewBox='-100 -100 584 840')
+dwg.add(formaterv())
 dwg.save()
 
-dwg = svgwrite.Drawing('%s/test.svg' % outdir, profile='tiny', size=('420mm', '594mm'), viewBox='-10 -10 410 584')
-dwg.add(dimension((50, 100), (100, 0), **solid_line))
-dwg.save()
+# dwg = svgwrite.Drawing('%s/test.svg' % outdir, profile='tiny', size=('420mm', '594mm'), viewBox='-10 -10 410 584')
+# dwg.add(dimension((50, 100), (0, -55), **solid_line))
+# dwg.add(dimension((50, 100), (30, -55), **solid_line))
+# dwg.add(dimension((50, 100), (55, -55), **solid_line))
+# dwg.add(dimension((50, 100), (55, -25), **solid_line))
+#
+# dwg.add(dimension((50, 100), (50, 0), **solid_line))
+# dwg.add(dimension((50, 100), (50, 20), **solid_line))
+# dwg.add(dimension((50, 100), (50, 50), **solid_line))
+# dwg.add(dimension((50, 100), (25, 50), **solid_line))
+#
+# dwg.add(dimension((50, 100), (0, 45), **solid_line))
+# dwg.add(dimension((50, 100), (-20, 45), **solid_line))
+# dwg.add(dimension((50, 100), (-45, 45), **solid_line))
+# dwg.add(dimension((50, 100), (-45, 22.5), **solid_line))
+#
+# dwg.add(dimension((50, 100), (-40, 0), **solid_line))
+# dwg.add(dimension((50, 100), (-40, -15), **solid_line))
+# dwg.add(dimension((50, 100), (-40, -40), **solid_line))
+# dwg.add(dimension((50, 100), (-20, -40), **solid_line))
+#
+# dwg.add(Line((120, 100), (160, 80), **dashed_line))
+# dwg.add(dimension((120, 100), (40, -20), 1, **solid_line))
+#
+# dwg.save()
 
