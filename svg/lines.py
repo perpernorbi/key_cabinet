@@ -3,4 +3,4 @@ segment_line = {'style': 'stroke:#000000;stroke-opacity:1;fill:none;stroke-width
 invisible_line = {'style': 'stroke:#000000;stroke-opacity:0;fill:none;stroke-width:0.4'}
 solid_line = {'style': 'stroke:#000000;stroke-opacity:1;fill:none;stroke-width:0.6'}
 dimension_line = {'style': 'stroke:#202020;stroke-opacity:1;fill:none;stroke-width:0.3'}
-helper_line = {'style': 'stroke:#606060;stroke-opacity:1;fill:none;stroke-width:0.25'}
+helper_line = {'style': 'stroke:#606060;stroke-opacity:1;fill:none;fill-opacity:1;stroke-width:0.25'}

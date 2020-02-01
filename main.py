@@ -220,6 +220,8 @@ def cabinet_top(left_in_view=False):
     dovetail_left.translate(0, -20)
     if not left_in_view:
         g.add(dovetail_left)
+        g.add(svg.domino.side(11, 120-40-21, **dashed_line))
+        g.add(svg.domino.side(11, 120-75-21, **dashed_line))
 
     dovetail_right = Group()
     dovetail_right.add(dovetail_diagonals(dovetail, **dashed_line))
@@ -228,6 +230,9 @@ def cabinet_top(left_in_view=False):
     dovetail_right.rotate(-90)
     dovetail_right.translate(-dovetail.l, 330-dovetail.w)
     g.add(dovetail_right)
+
+    g.add(svg.domino.side(340-20+6, 120-40-21, **dashed_line))
+    g.add(svg.domino.side(340-20+6, 120-75-21, **dashed_line))
 
     # g.add(Rect(*R(x1=5, y1=0, w=330, h=100), **dashed_line))
     g.add(Line((5, 0), (5, 100), **invisible_or_dashed))
@@ -301,6 +306,30 @@ def dash_it(insert, size, d, **extra):
     return g
 
 
+def end_grain_mark(insert, size, **extra):
+    x, y = insert
+    width, height = size
+    g = Group()
+    rx = 2 * width
+    ry = height * 3
+    g.add(Path(f'M{x} {y+1*height/3} a {rx} {ry} 0 0 0 {width} 0', **extra))
+    g.add(Path(f'M{x} {y+2*height/3} a {rx} {ry} 0 0 0 {width} 0', **extra))
+
+    center_x = width / 2
+    center_y = (rx**2 - width**2 / 4.0)**(1.0/2.0)
+    for i in range(0,8):
+        l1x = i * width / 7
+        l1y = 7*height/8
+        m = (center_y + l1y) / (center_x - l1x)
+        g.add(Line((x+l1x, y+l1y), (x+l1x+height/2/m, y+height/4), **extra))
+    return g
+
+
+def rotate_group(g, *args, **kwargs):
+    g.rotate(*args, **kwargs)
+    return g
+
+
 def jellegrajz():
     reset_linestyles()
     g = Group()
@@ -309,10 +338,31 @@ def jellegrajz():
     cab_front.add(dash_it((170, 0), (170, 15), 8, **helper_line))
     cab_front.add(dash_it((320, 15), (15, 260), 8, **helper_line))
     cab_front.add(dash_it((170, 260), (150, 15), 8, **helper_line))
-    cab_front.translate(200,0)
+    cab_front.add(Circle((340-20+7.5, 30), 40, **dashed_line))
+    cab_front.add(Circle((340-20+7.5, 137.5 + 20), 40, **dashed_line))
+    cab_front.translate(200, 0)
     g.add(cab_front)
 
     cab_side = cabinet_side()
+    cab_side.add(end_grain_mark((2, 0), (26, 15), **helper_line))
+    cab_side.add(Line((30, 0), (30, 15), **helper_line))
+    cab_side.add(rotate_group(end_grain_mark((32, 0), (26, 15), **helper_line), 180, (32+26/2, 7.5)))
+    cab_side.add(Line((60, 0), (60, 15), **helper_line))
+    cab_side.add(end_grain_mark((62, 0), (26, 15), **helper_line))
+    cab_side.add(Line((90, 0), (90, 15), **helper_line))
+    cab_side.add(rotate_group(end_grain_mark((92, 0), (22, 15), **helper_line), 180, (92+22/2, 7.5)))
+
+    cab_side.add(end_grain_mark((22, 260), (29, 15), **helper_line))
+    cab_side.add(Line((22+29+2, 260), (22+29+2, 275), **helper_line))
+    cab_side.add(rotate_group(end_grain_mark((22+29+4, 260), (29, 15), **helper_line), 180, (22+29+4+29/2, 267.5)))
+    cab_side.add(Line((22+2*(29+2)+2, 260), (22+2*(29+2)+2, 275), **helper_line))
+    cab_side.add(end_grain_mark((22+2*(29+2)+4, 260), (25, 15), **helper_line))
+
+    cab_side.add(rotate_group(end_grain_mark((120-4-7.5-20, 15+20-7.5), (40, 15), **helper_line), 90, (120-4-7.5, 15+20)))
+    cab_side.add(rotate_group(end_grain_mark((120-4-7.5-20, 137.5+20-7.5), (40, 15), **helper_line), 90, (120-4-7.5, 137.5+20)))
+
+    cab_side.add(Line((117.5, 5), (117.5, 270), **helper_line))
+    cab_side.add(Line((118.5, 5), (118.5, 270), **helper_line))
     g.add(cab_side)
 
     door_s = door_side()
@@ -363,10 +413,19 @@ reset_linestyles()
 # dwg.add(door_left_top())
 # dwg.save()
 #
-# dwg = svgwrite.Drawing('%s/cabinet_front.svg' % outdir, profile='tiny', size=('420mm', '594mm'), viewBox='-10 -10 410 584')
-# dwg.add(cabinet_front())
-# dwg.save()
-#
+dwg = svgwrite.Drawing('%s/cabinet_front.svg' % outdir, profile='tiny', size=('420mm', '594mm'), viewBox='-10 -10 410 584')
+dwg.add(cabinet_front(left_dashed=True))
+dwg.add(dimension((320, 0), (0, 15), **dimension_line))
+dwg.add(dimension((320, 70), (15, 0), **dimension_line))
+
+dwg.add(dimension((320, 55), (10, 0), **dimension_line))
+dwg.add(dimension((320, 55), (0, -2), 0.8, -5, **dimension_line))
+dwg.add(dimension((335, 15), (5, 0), **dimension_line))
+dwg.add(dimension((320, 15), (4.5, 0), **dimension_line))
+dwg.add(dimension((335-4.5, 15), (4.5, 0), **dimension_line))
+dwg.add(dimension())
+dwg.save()
+
 # dwg = svgwrite.Drawing('%s/cabinet_side.svg' % outdir, profile='tiny', size=('420mm', '594mm'), viewBox='-10 -10 410 584')
 # dwg.add(cabinet_side())
 # dwg.save()
