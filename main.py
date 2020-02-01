@@ -290,10 +290,25 @@ def formaterv():
     return g
 
 
+def dash_it(insert, size, d, **extra):
+    x, y = insert
+    width, height = size
+    g = Group()
+    for i in range(d, width + height, d):
+        line_start = (x + i, y) if i <= width else (x + width, y + i - width)
+        line_end = (x + i - height, y + height) if i >= height else (x, y + i)
+        g.add(Line(line_start, line_end, **extra))
+    return g
+
+
 def jellegrajz():
     reset_linestyles()
     g = Group()
     cab_front = cabinet_front(left_dashed=True)
+    cab_front.add(Line((170, -10), (170, 285), **segment_line))
+    cab_front.add(dash_it((170, 0), (170, 15), 8, **helper_line))
+    cab_front.add(dash_it((320, 15), (15, 260), 8, **helper_line))
+    cab_front.add(dash_it((170, 260), (150, 15), 8, **helper_line))
     cab_front.translate(200,0)
     g.add(cab_front)
 
