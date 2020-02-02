@@ -5,7 +5,7 @@ from svgwrite.shapes import Line
 import math
 
 
-def dimension(insert, size, font_size=0.8, offset=None, **kwargs):
+def dimension(insert, size, font_size=0.8, offset=None, leg_difference=0, **kwargs):
     offset = offset if offset is not None else font_size * 7
     x, y = insert[0], insert[1] + offset
     width, height = size
@@ -17,8 +17,9 @@ def dimension(insert, size, font_size=0.8, offset=None, **kwargs):
     e = 1
     endtick = lambda i: ((i[0]-e, i[1]+e), (i[0]+e, i[1]-e))
     g = Group()
-    g.add(Line(insert, (x, y), **kwargs))
-    g.add(Line((x + l, insert[1]), (x + l,y), **kwargs))
+    left_leg_shorter, right_leg_shorter = (leg_difference, 0) if leg_difference > 0 else (0, -leg_difference)
+    g.add(Line((insert[0], insert[1] + left_leg_shorter), (x, y), **kwargs))
+    g.add(Line((x + l, insert[1] + right_leg_shorter), (x + l, y), **kwargs))
     g.add(Line(*endtick((x, y)), **kwargs))
     g.add(Line(*endtick((x + l, y)), **kwargs))
     g.add(Line((x, y), (x + l, y), **kwargs))

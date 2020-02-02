@@ -10,7 +10,7 @@ import svg.lines as LineStyles
 
 import svgwrite
 from svgwrite.path import Path
-from svgwrite.shapes import Rect, Line, Circle
+from svgwrite.shapes import Rect, Line, Circle, Ellipse
 from svgwrite.container import Group
 
 dashed_line = {}
@@ -363,6 +363,8 @@ def jellegrajz():
 
     cab_side.add(Line((117.5, 5), (117.5, 270), **helper_line))
     cab_side.add(Line((118.5, 5), (118.5, 270), **helper_line))
+
+    cab_side.add(Ellipse((60, 27), (80, 50), **dashed_line))
     g.add(cab_side)
 
     door_s = door_side()
@@ -415,20 +417,50 @@ reset_linestyles()
 #
 dwg = svgwrite.Drawing('%s/cabinet_front.svg' % outdir, profile='tiny', size=('420mm', '594mm'), viewBox='-10 -10 410 584')
 dwg.add(cabinet_front(left_dashed=True))
+
+# 1. csomópont
 dwg.add(dimension((320, 0), (0, 15), **dimension_line))
 dwg.add(dimension((320, 70), (15, 0), **dimension_line))
-
 dwg.add(dimension((320, 55), (10, 0), **dimension_line))
-dwg.add(dimension((320, 55), (0, -2), 0.8, -5, **dimension_line))
+dwg.add(dimension((320, 55), (0, -2), offset=24.5, leg_difference=10, **dimension_line))
+dwg.add(dimension((320, 15), (0, 40), 0.8, 10, **dimension_line))
 dwg.add(dimension((335, 15), (5, 0), **dimension_line))
 dwg.add(dimension((320, 15), (4.5, 0), **dimension_line))
 dwg.add(dimension((335-4.5, 15), (4.5, 0), **dimension_line))
-dwg.add(dimension())
+dwg.add(dimension((340-5-4.5, 5+37), (0, -37), 0.8, 14, **dimension_line))
+
+# 2. csomópont
+dwg.add(dimension((320, 120), (15, 0), **dimension_line))
+dwg.add(dimension((320, 137.5), (0, 40), 0.8, 10, **dimension_line))
+dwg.add(dimension((320, 137.5+2), (0, -2), offset=20, leg_difference=-10, **dimension_line))
+dwg.add(dimension((320, 137.5+40), (0, -2), offset=20, leg_difference=10, **dimension_line))
+dwg.add(dimension((320, 137.5+40), (10, 0), **dimension_line))
 dwg.save()
 
-# dwg = svgwrite.Drawing('%s/cabinet_side.svg' % outdir, profile='tiny', size=('420mm', '594mm'), viewBox='-10 -10 410 584')
-# dwg.add(cabinet_side())
-# dwg.save()
+reset_linestyles()
+dwg = svgwrite.Drawing('%s/cabinet_side.svg' % outdir, profile='tiny', size=('420mm', '594mm'), viewBox='-20 -20 410 584')
+dwg.add(cabinet_side())
+dwg.add(dimension((120, 0), (-120, 0), **dimension_line))
+dwg.add(dimension((0, 15), (0, -15), **dimension_line))
+dwg.add(dimension((120-4, 62), (4, 0), offset=0, **dimension_line))
+dwg.add(dimension((20, 70), (100, 0), offset=0, **dimension_line))
+
+# dominos
+dwg.add(dimension((20, 25), (20, 0), offset=0, **dimension_line))
+dwg.add(dimension((41, 25), (19, 0), offset=0, **dimension_line))
+dwg.add(dimension((40, 42), (21, 0), **dimension_line))
+dwg.add(dimension((20, 42), (75-20, 0), offset=12, **dimension_line))
+dwg.add(dimension((40+21, 42), (0, -27), **dimension_line))
+dwg.add(dimension((40+21, 42-27), (0, -10), **dimension_line))
+dwg.add(dimension((40+21, 42-27-10), (0, -5), **dimension_line))
+dwg.add(dimension((85, 41), (0, -35), offset=0, **dimension_line))
+
+# hanger
+dwg.add(dimension((120-19, 15+20), (19, 0), offset=0, **dimension_line))
+dwg.add(dimension((120, 15+40), (0, -40), **dimension_line))
+dwg.add(dimension((120, 15), (0, -10), **dimension_line))
+dwg.add(dimension((120, 5), (0, -5), **dimension_line))
+dwg.save()
 #
 # dwg = svgwrite.Drawing('%s/cabinet_bottom.svg' % outdir, profile='tiny', size=('420mm', '594mm'), viewBox='-10 -10 410 584')
 # dwg.add(cabinet_bottom())
@@ -438,13 +470,14 @@ dwg.save()
 # dwg.add(cabinet_top())
 # dwg.save()
 
-dwg = svgwrite.Drawing('%s/formaterv.svg' % outdir, profile='tiny', size=('594mm', '840mm'), viewBox='-100 -100 584 840')
-dwg.add(formaterv())
-dwg.save()
+if False:
+    dwg = svgwrite.Drawing('%s/formaterv.svg' % outdir, profile='tiny', size=('594mm', '840mm'), viewBox='-100 -100 584 840')
+    dwg.add(formaterv())
+    dwg.save()
 
-dwg = svgwrite.Drawing('%s/jellegrajz.svg' % outdir, profile='tiny', size=('594mm', '840mm'), viewBox='-100 -100 584 840')
-dwg.add(jellegrajz())
-dwg.save()
+    dwg = svgwrite.Drawing('%s/jellegrajz.svg' % outdir, profile='tiny', size=('594mm', '840mm'), viewBox='-100 -100 584 840')
+    dwg.add(jellegrajz())
+    dwg.save()
 
 # dwg = svgwrite.Drawing('%s/test.svg' % outdir, profile='tiny', size=('420mm', '594mm'), viewBox='-10 -10 410 584')
 # dwg.add(dimension((50, 100), (0, -55), **solid_line))
