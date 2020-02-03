@@ -372,6 +372,7 @@ def jellegrajz():
     g.add(door_s)
 
     door_f = door_front()
+    door_f.add(Circle((25, 230), 45, **dashed_line))
     door_f.translate(200 + 5 + 2, 16)
     g.add(door_f)
 
@@ -386,6 +387,9 @@ def jellegrajz():
     # g.add(door_t1)
 
     door_t2 = door_left_top(full_dashed=True)
+    door_t2.add(end_grain_mark((2, -1), (28, 18), **helper_line))
+    door_t2.add(end_grain_mark((132, -1), (28, 18), **helper_line))
+    door_t2.add(Circle((16, 7.5), 30, **dashed_line))
     door_t2.translate(200 + 5 + 2 + 2 + 162 + 162, 340+100+1)
     door_t2.scale(-1,1)
     g.add(door_t2)
@@ -396,21 +400,50 @@ def jellegrajz():
 
 outdir = '/d/tmp/a'
 reset_linestyles()
-# dwg = svgwrite.Drawing('%s/sheet.svg' % outdir, profile='tiny', size=('420mm', '594mm'), viewBox='-10 -10 410 584')
-# dwg.add(svg.sheet.sheet())
-# dwg.save()
+dwg = svgwrite.Drawing('%s/sheet.svg' % outdir, profile='tiny', size=('420mm', '594mm'), viewBox='-10 -10 410 584')
+mm15 = 'l4 0 l2 -1.4 l2 2.8 l2 -1.4 l4 0'
+dwg.add(Path('M20 20 ' + mm15, **solid_line))
+dwg.add(Path('M20 30 ' + mm15, **dashed_line))
+
+mm18 = 'l6 0 l2 -1.4 l2 2.8 l2 -1.4 l6 0'
+dwg.add(Path('M40 20 ' + mm18, **solid_line))
+dwg.add(Path('M40 30 ' + mm18, **dashed_line))
+
+mm40 = 'l7 0 l2 -1.4 l2 2.8 l2 -1.4 l14 0 l2 -1.4 l2 2.8 l3 -1.4 l7 0'
+dwg.add(Path('M60 20 ' + mm40, **solid_line))
+dwg.add(Path('M60 30 ' + mm40, **dashed_line))
+
+dwg.add(svg.sheet.sheet())
+dwg.save()
 # #p = Path(**dashed_line)
 # #p.push('M 100 100')
 # #p.push('100 200 200 200')
 #
-# dwg = svgwrite.Drawing('%s/door_front.svg' % outdir, profile='tiny', size=('420mm', '594mm'), viewBox='-10 -10 410 584')
-# dwg.add(door_front())
-# dwg.save()
-#
-# dwg = svgwrite.Drawing('%s/door_side.svg' % outdir, profile='tiny', size=('420mm', '594mm'), viewBox='-10 -10 410 584')
-# dwg.add(door_side())
-# dwg.save()
-#
+
+if False:
+    dwg = svgwrite.Drawing('%s/door_front.svg' % outdir, profile='tiny', size=('420mm', '594mm'), viewBox='-10 -10 410 584')
+    dwg.add(door_front())
+    dwg.add(dimension((0, 258), (30, 0), **dimension_line))
+    dwg.add(dimension((30, 258), (10, 0), **dimension_line))
+    dwg.add(dimension((30, 258-30), (0, 30), **dimension_line))
+    dwg.add(dimension((17, 258), (0, -55), offset=0, **dimension_line))
+    dwg.add(dimension((17, 258), (0, -55), offset=0, **dimension_line))
+    dwg.add(dimension((0, 258-55), (17, 0), offset=0, **dimension_line))
+    dwg.add(dimension((31, 258-55), (100, 0), offset=0, **dimension_line))
+    dwg.add(dimension((31, 258-20+0.7*8), (162-2*31, 0), offset = 0, **dimension_line))
+    dwg.add(dimension((40, 258-20), (162-2*40, 0), offset = 0, **dimension_line))
+    dwg.save()
+
+if False:
+    dwg = svgwrite.Drawing('%s/door_side.svg' % outdir, profile='tiny', size=('420mm', '594mm'), viewBox='-10 -10 410 584')
+    dwg.add(dimension((0, 80), (6.5, 0), offset=0, **dimension_line))
+    dwg.add(dimension((6.5, 80), (5, 0), offset=0, **dimension_line))
+    dwg.add(dimension((11.5, 80), (6.5, 0), offset=0, **dimension_line))
+    dwg.add(dimension((18, 55), (-13, 0), offset=0, **dimension_line))
+    dwg.add(dimension((7, 15), (4, 0), offset=0, **dimension_line))
+    dwg.add(door_side())
+    dwg.save()
+
 # dwg = svgwrite.Drawing('%s/door_left_top.svg' % outdir, profile='tiny', size=('420mm', '594mm'), viewBox='-10 -10 410 584')
 # dwg.add(door_left_top())
 # dwg.save()
@@ -462,9 +495,11 @@ dwg.add(dimension((120, 15), (0, -10), **dimension_line))
 dwg.add(dimension((120, 5), (0, -5), **dimension_line))
 dwg.save()
 #
-# dwg = svgwrite.Drawing('%s/cabinet_bottom.svg' % outdir, profile='tiny', size=('420mm', '594mm'), viewBox='-10 -10 410 584')
-# dwg.add(cabinet_bottom())
-# dwg.save()
+dwg = svgwrite.Drawing('%s/cabinet_bottom.svg' % outdir, profile='tiny', size=('420mm', '594mm'), viewBox='-20 -20 410 584')
+dwg.add(dimension((5, 100), (5, 0), **dimension_line))
+dwg.add(dimension((10, 100), (10, 0), **dimension_line))
+dwg.add(cabinet_bottom())
+dwg.save()
 #
 # dwg = svgwrite.Drawing('%s/cabinet_top.svg' % outdir, profile='tiny', size=('420mm', '594mm'), viewBox='-10 -10 410 584')
 # dwg.add(cabinet_top())
@@ -475,33 +510,7 @@ if False:
     dwg.add(formaterv())
     dwg.save()
 
+if False:
     dwg = svgwrite.Drawing('%s/jellegrajz.svg' % outdir, profile='tiny', size=('594mm', '840mm'), viewBox='-100 -100 584 840')
     dwg.add(jellegrajz())
     dwg.save()
-
-# dwg = svgwrite.Drawing('%s/test.svg' % outdir, profile='tiny', size=('420mm', '594mm'), viewBox='-10 -10 410 584')
-# dwg.add(dimension((50, 100), (0, -55), **solid_line))
-# dwg.add(dimension((50, 100), (30, -55), **solid_line))
-# dwg.add(dimension((50, 100), (55, -55), **solid_line))
-# dwg.add(dimension((50, 100), (55, -25), **solid_line))
-#
-# dwg.add(dimension((50, 100), (50, 0), **solid_line))
-# dwg.add(dimension((50, 100), (50, 20), **solid_line))
-# dwg.add(dimension((50, 100), (50, 50), **solid_line))
-# dwg.add(dimension((50, 100), (25, 50), **solid_line))
-#
-# dwg.add(dimension((50, 100), (0, 45), **solid_line))
-# dwg.add(dimension((50, 100), (-20, 45), **solid_line))
-# dwg.add(dimension((50, 100), (-45, 45), **solid_line))
-# dwg.add(dimension((50, 100), (-45, 22.5), **solid_line))
-#
-# dwg.add(dimension((50, 100), (-40, 0), **solid_line))
-# dwg.add(dimension((50, 100), (-40, -15), **solid_line))
-# dwg.add(dimension((50, 100), (-40, -40), **solid_line))
-# dwg.add(dimension((50, 100), (-20, -40), **solid_line))
-#
-# dwg.add(Line((120, 100), (160, 80), **dashed_line))
-# dwg.add(dimension((120, 100), (40, -20), 1, **solid_line))
-#
-# dwg.save()
-
